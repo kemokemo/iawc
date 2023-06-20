@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 )
 
@@ -30,14 +31,26 @@ func run(args []string) int {
 }
 
 func walk(root string, wg *sync.WaitGroup, w io.Writer) {
+	defer wg.Done()
+
 	// Current implementation doesn't seem to generate error.
 	// So, ignore returned error.
-	_ = filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
 		if d.IsDir() {
 			return nil
 		}
 		fmt.Fprintf(w, "path: %v\n", path)
+		b, err := os.ReadFile(path)
+		if err != nil {
+			return fmt.Errorf("failed to read file: %v, %v", path, err)
+		}
+		i := strings.Index(string(b), "名前")
+		if i != -1 {
+			fmt.Fprintf(w, "%v: %v\n", path, i)
+		}
 		return nil
 	})
-	wg.Done()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to walk files, %v", err)
+	}
 }
