@@ -12,7 +12,6 @@ You can get result in `{found file name}: {found word}` format.
 ```sh
 # eg)
 iawc sample
-sample/sample-e.txt: World
 sample/sample.txt: 名前
 ```
 
