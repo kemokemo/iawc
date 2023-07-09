@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io"
 	"io/fs"
@@ -12,11 +13,24 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+var ver bool
+
+func init() {
+	flag.BoolVar(&ver, "version", false, "display version")
+	flag.BoolVar(&ver, "v", false, "display version")
+	flag.Parse()
+}
+
 func main() {
 	os.Exit(run(os.Args))
 }
 
 func run(args []string) int {
+	if ver {
+		fmt.Fprintf(os.Stdout, "%s version %s.%s\n", Name, Version, Revision)
+		return 0
+	}
+
 	b, err := os.ReadFile("iawc.yaml")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, fmt.Sprintf("failed to read iawc.yaml file, %v", err))
