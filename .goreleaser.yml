@@ -1,0 +1,54 @@
+project_name: iawc
+builds:
+  - main: .
+    binary: iawc
+    # refer to the https://pkg.go.dev/cmd/link
+    ldflags:
+      - -s -w -X main.Revision={{.ShortCommit}}
+    goos:
+      - darwin
+      - linux
+      - windows
+      - freebsd
+    goarch:
+      - '386'
+      - amd64
+      - arm64
+changelog:
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^chore:'
+archives:
+  - name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+    replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - README.md
+      - LICENSE
+      - iawc.yaml
+release:
+  prerelease: auto
+brews:
+  - tap:
+      owner: kemokemo
+      name: homebrew-tap
+    homepage: "https://github.com/kemokemo/iawc"
+    description: "This tool check and report inappropriate words in your documents."
+    install: |
+      bin.install "iawc"
+scoop:
+  bucket:
+    owner: kemokemo
+    name: scoop-bucket
+  homepage:  https://github.com/kemokemo/iawc
+  description: This tool check and report inappropriate words in your documents.
+  license: MIT
