@@ -33,7 +33,7 @@ func run(args []string) int {
 
 	b, err := os.ReadFile("iawc.yaml")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, fmt.Sprintf("failed to read iawc.yaml file, %v", err))
+		fmt.Fprintf(os.Stderr, "failed to read iawc.yaml file, %v", err)
 		return 1
 	}
 	if len(args) < 2 {
@@ -44,7 +44,7 @@ func run(args []string) int {
 	words := Words{}
 	err = yaml.Unmarshal(b, &words)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, fmt.Sprintf("failed to unmarshal Words, %v", err))
+		fmt.Fprintf(os.Stderr, "failed to unmarshal Words, %v", err)
 		return 1
 	}
 
@@ -62,6 +62,9 @@ func walk(root string, wg *sync.WaitGroup, w io.Writer, words Words) {
 	defer wg.Done()
 
 	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return fmt.Errorf("error was invoked by WalkDir: %v, %v", path, err)
+		}
 		if d.IsDir() {
 			return nil
 		}
