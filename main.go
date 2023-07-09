@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"gopkg.in/yaml.v3"
 )
 
 func main() {
@@ -15,22 +17,34 @@ func main() {
 }
 
 func run(args []string) int {
+	b, err := os.ReadFile("ngwc.yaml")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, fmt.Sprintf("failed to read .ngwc file, %v", err))
+		return 1
+	}
 	if len(args) < 2 {
-		fmt.Fprintf(os.Stderr, "Please set directories to find specified words")
+		fmt.Fprintf(os.Stderr, "please set directories to find specified words")
+		return 2
+	}
+
+	words := Words{}
+	err = yaml.Unmarshal(b, &words)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, fmt.Sprintf("failed to unmarshal Words, %v", err))
 		return 1
 	}
 
 	wg := &sync.WaitGroup{}
 	for _, root := range args[1:] {
 		wg.Add(1)
-		go walk(root, wg, os.Stdout, []string{"名前", "What"})
+		go walk(root, wg, os.Stdout, words)
 	}
 	wg.Wait()
 
 	return 0
 }
 
-func walk(root string, wg *sync.WaitGroup, w io.Writer, targets []string) {
+func walk(root string, wg *sync.WaitGroup, w io.Writer, words Words) {
 	defer wg.Done()
 
 	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
@@ -43,8 +57,15 @@ func walk(root string, wg *sync.WaitGroup, w io.Writer, targets []string) {
 			return fmt.Errorf("failed to read file: %v, %v", path, err)
 		}
 
-		for _, t := range targets {
-			if strings.Contains(string(b), t) {
+		found := false
+		for _, t := range words.Targets {
+			if words.CaseSensitive {
+				found = strings.Contains(string(b), t)
+			} else {
+				found = strings.Contains(strings.ToLower(string(b)), strings.ToLower(t))
+			}
+
+			if found {
 				fmt.Fprintf(w, "%v: %v\n", path, t)
 			}
 		}

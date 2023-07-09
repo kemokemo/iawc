@@ -1,0 +1,4 @@
+case_sensitive: true
+targets:
+  - 名前
+  - World
