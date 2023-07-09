@@ -17,9 +17,9 @@ func main() {
 }
 
 func run(args []string) int {
-	b, err := os.ReadFile("ngwc.yaml")
+	b, err := os.ReadFile("iawc.yaml")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, fmt.Sprintf("failed to read .ngwc file, %v", err))
+		fmt.Fprintf(os.Stderr, fmt.Sprintf("failed to read iawc.yaml file, %v", err))
 		return 1
 	}
 	if len(args) < 2 {

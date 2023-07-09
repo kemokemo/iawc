@@ -1,4 +1,4 @@
-module github.com/kemokemo/ngwc
+module github.com/kemokemo/iawc
 
 go 1.20
 
